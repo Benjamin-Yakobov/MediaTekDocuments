@@ -1239,5 +1239,8 @@ namespace MediaTekDocuments.view
             }
         }
         #endregion
+
+        #region Onglet Commandes de livres
+        #endregion
     }
 }
