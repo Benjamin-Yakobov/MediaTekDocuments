@@ -1833,7 +1833,7 @@ namespace MediaTekDocuments.view
             this.tabCommandes.Padding = new System.Windows.Forms.Padding(3);
             this.tabCommandes.Size = new System.Drawing.Size(875, 633);
             this.tabCommandes.TabIndex = 5;
-            this.tabCommandes.Text = "Commandes";
+            this.tabCommandes.Text = "Commandes de livres";
             this.tabCommandes.UseVisualStyleBackColor = true;
             // 
             // grpRechercherLivres
