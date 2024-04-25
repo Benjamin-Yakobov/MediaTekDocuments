@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using MediaTekDocuments.model;
 using MediaTekDocuments.dal;
+using System;
+using Newtonsoft.Json;
+
 
 namespace MediaTekDocuments.controller
 {
@@ -96,5 +99,105 @@ namespace MediaTekDocuments.controller
         {
             return access.CreerExemplaire(exemplaire);
         }
+
+        /// <summary>
+        /// Récupération de toutes les commandes d'un livre.
+        /// </summary>
+        /// <param name="idLivre"></param>
+        /// <returns></returns>
+        public List<CommandeDocument> GetCommandesLivre(string idLivre)
+        {
+            return access.GetCommandesLivres(idLivre);
+        }
+
+        /// <summary>
+        /// Récupération de tous les états possibles d'une commande.
+        /// </summary>
+        /// <returns></returns>
+        public List<Suivi> GetAllSuivis()
+        {
+            return access.GetAllSuivis();
+        }
+
+        /// <summary>
+        /// Ajout d'une commande passée en paramètre.
+        /// </summary>
+        /// <param name="commande"></param>
+        public void AjouterCommande(CommandeDocument commande)
+        {
+            AjouterModifierSupprimerCommande(commande.Id, commande.DateCommande, commande.Montant, commande.NbExemplaire, commande.IdLivreDvd, commande.IdSuivi, commande.Etat, "ajouter");
+        }
+
+        /// <summary>
+        /// Modification d'une commande passée en paramètre.
+        /// </summary>
+        /// <param name="commande"></param>
+        public void ModifierCommande(CommandeDocument commande)
+        {
+            AjouterModifierSupprimerCommande(commande.Id, commande.DateCommande, commande.Montant, commande.NbExemplaire, commande.IdLivreDvd, commande.IdSuivi, commande.Etat, "modifier");
+
+        }
+
+        /// <summary>
+        /// Suppression d'une commande passée en paramètre.
+        /// </summary>
+        /// <param name="commande"></param>
+        public void SupprimerCommande(CommandeDocument commande)
+        {
+            AjouterModifierSupprimerCommande(commande.Id, commande.DateCommande, commande.Montant, commande.NbExemplaire, commande.IdLivreDvd, commande.IdSuivi, commande.Etat, "supprimer");
+
+        }
+
+        /// <summary>
+        /// Ajouter, Modifier, Supprimer, une commande.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="dateCommande"></param>
+        /// <param name="montant"></param>
+        /// <param name="nbExemplaire"></param>
+        /// <param name="idLivreDvd"></param>
+        /// <param name="idSuivi"></param>
+        /// <param name="etat"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public bool AjouterModifierSupprimerCommande(string id, DateTime dateCommande, double montant, int nbExemplaire, string idLivreDvd, int idSuivi, string etat, string action)
+        {
+            Dictionary<string, object> commandeLivre = new Dictionary<string, object>();
+            commandeLivre.Add("Id", id);
+            commandeLivre.Add("DateCommande", dateCommande.ToString("yyyy-MM-dd"));
+            commandeLivre.Add("Montant", montant);
+            commandeLivre.Add("NbExemplaire", nbExemplaire);
+            commandeLivre.Add("IdLivreDvd", idLivreDvd);
+            commandeLivre.Add("IdSuivi", idSuivi);
+            commandeLivre.Add("Etat", etat);
+
+            if(action == "ajouter")
+            {
+                access.AjouterEnregistrement("commandedocument", JsonConvert.SerializeObject(commandeLivre));
+            }
+            else
+            {
+                if(action == "modifier")
+                {
+                    access.ModifierEnregistrement("commandedocument", id, JsonConvert.SerializeObject(commandeLivre));
+                }
+                else
+                {
+                    access.SupprimerEnregistrement("commandedocument", JsonConvert.SerializeObject(commandeLivre));
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Récuperation de l'id maximal des commandes.
+        /// </summary>
+        public string GetMaxIdCommande()
+        {
+            string maxId = access.getMaxId("maxcommande");
+            return maxId;
+        }
     }
+
 }

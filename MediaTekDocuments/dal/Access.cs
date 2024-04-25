@@ -36,11 +36,16 @@ namespace MediaTekDocuments.dal
         private const string POST = "POST";
         /// <summary>
         /// méthode HTTP pour update
-
+        private const string PUT = "PUT";
+        /// <summary>
+        /// méthode HTTP pour supprimer
+        /// </summary>
+        private const string DELETE = "DELETE";
         /// <summary>
         /// Méthode privée pour créer un singleton
         /// initialise l'accès à l'API
         /// </summary>
+
         private Access()
         {
             String authenticationString;
@@ -174,6 +179,7 @@ namespace MediaTekDocuments.dal
             List<T> liste = new List<T>();
             try
             {
+                Console.WriteLine("TraitementRecup " + methode + " et " + message);
                 JObject retour = api.RecupDistant(methode, message);
                 // extraction du code retourné
                 String code = (String)retour["code"];
@@ -241,5 +247,100 @@ namespace MediaTekDocuments.dal
             }
         }
 
+        /// <summary>
+        /// Envoi d'une requête HTTP vers l'API rest_mediatekformation, Récupération de toutes les commandes d'un livre.
+        /// </summary>
+        /// <param name="idLivre"></param>
+        /// <returns></returns>
+        public List<CommandeDocument> GetCommandesLivres(string idLivre)
+        {
+            String jsonIdDocumentLivre = convertToJson("idLivreDvd", idLivre);
+            List<CommandeDocument> commandesLivres = TraitementRecup<CommandeDocument>(GET, "commandedocument/" + jsonIdDocumentLivre);
+            return commandesLivres;
+        }
+
+        /// <summary>
+        /// Envoi d'une requête HTTP vers l'API rest_mediatekformation, Récupération des états possibles d'une commande.
+        /// </summary>
+        /// <returns></returns>
+        public List<Suivi> GetAllSuivis()
+        {
+            IEnumerable<Suivi> suivis = TraitementRecup<Suivi>(GET, "suivi");
+            return new List<Suivi>(suivis);
+        }
+
+        /// <summary>
+        /// Envoi d'une requête HTTP vers l'API rest_mediatekformation, Ajout d'un enregistrement dans la BDD.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="jsonEntite"></param>
+        /// <returns></returns>
+        public bool AjouterEnregistrement(string type, String jsonEntite)
+        {
+            try
+            {
+                List<Object> liste = TraitementRecup<Object>(POST, type + "/" + jsonEntite);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Envoi d'une requête HTTP vers l'API rest_mediatekformation, Modification d'un enregistrement dans la BDD.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="id"></param>
+        /// <param name="jsonEntite"></param>
+        /// <returns></returns>
+        public bool ModifierEnregistrement(string type, string id, String jsonEntite)
+        {
+            try
+            {
+                List<Object> liste = TraitementRecup<Object>(PUT, type + "/" + id + "/" + jsonEntite);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Envoi d'une requête HTTP vers l'API rest_mediatekformation, Suppréssion d'un enregistrement dans la BDD.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="jsonEntite"></param>
+        /// <returns></returns>
+        public bool SupprimerEnregistrement(string type, String jsonEntite)
+        {
+            try
+            {
+                List<Object> liste = TraitementRecup<Object>(DELETE, type + "/" + jsonEntite);
+                return (liste != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Retourne l'id maximal.
+        /// </summary>
+        /// <param name="maxId"></param>
+        /// <returns></returns>
+        public string getMaxId(string maxId)
+        {
+            List<Categorie> maxid = TraitementRecup<Categorie>(GET, maxId);
+            return maxid[0].Id;
+        }
+
     }
+
 }
