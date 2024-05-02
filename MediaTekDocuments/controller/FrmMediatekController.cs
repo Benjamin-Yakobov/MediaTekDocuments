@@ -125,7 +125,7 @@ namespace MediaTekDocuments.controller
         /// <param name="commande"></param>
         public void AjouterCommande(CommandeDocument commande)
         {
-            AjouterModifierSupprimerCommande(commande.Id, commande.DateCommande, commande.Montant, commande.NbExemplaire, commande.IdLivreDvd, commande.IdSuivi, commande.Etat, "ajouter");
+            access.AjouterEnregistrement("commandedocument", JsonConvert.SerializeObject(commande));
         }
 
         /// <summary>
@@ -134,8 +134,7 @@ namespace MediaTekDocuments.controller
         /// <param name="commande"></param>
         public void ModifierCommande(CommandeDocument commande)
         {
-            AjouterModifierSupprimerCommande(commande.Id, commande.DateCommande, commande.Montant, commande.NbExemplaire, commande.IdLivreDvd, commande.IdSuivi, commande.Etat, "modifier");
-
+            access.ModifierEnregistrement("commandedocument", commande.Id, JsonConvert.SerializeObject(commande));
         }
 
         /// <summary>
@@ -144,50 +143,7 @@ namespace MediaTekDocuments.controller
         /// <param name="commande"></param>
         public void SupprimerCommande(CommandeDocument commande)
         {
-            AjouterModifierSupprimerCommande(commande.Id, commande.DateCommande, commande.Montant, commande.NbExemplaire, commande.IdLivreDvd, commande.IdSuivi, commande.Etat, "supprimer");
-
-        }
-
-        /// <summary>
-        /// Ajouter, Modifier, Supprimer, une commande.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="dateCommande"></param>
-        /// <param name="montant"></param>
-        /// <param name="nbExemplaire"></param>
-        /// <param name="idLivreDvd"></param>
-        /// <param name="idSuivi"></param>
-        /// <param name="etat"></param>
-        /// <param name="action"></param>
-        /// <returns></returns>
-        public bool AjouterModifierSupprimerCommande(string id, DateTime dateCommande, double montant, int nbExemplaire, string idLivreDvd, int idSuivi, string etat, string action)
-        {
-            Dictionary<string, object> commandeLivre = new Dictionary<string, object>();
-            commandeLivre.Add("Id", id);
-            commandeLivre.Add("DateCommande", dateCommande.ToString("yyyy-MM-dd"));
-            commandeLivre.Add("Montant", montant);
-            commandeLivre.Add("NbExemplaire", nbExemplaire);
-            commandeLivre.Add("IdLivreDvd", idLivreDvd);
-            commandeLivre.Add("IdSuivi", idSuivi);
-            commandeLivre.Add("Etat", etat);
-
-            if(action == "ajouter")
-            {
-                access.AjouterEnregistrement("commandedocument", JsonConvert.SerializeObject(commandeLivre));
-            }
-            else
-            {
-                if(action == "modifier")
-                {
-                    access.ModifierEnregistrement("commandedocument", id, JsonConvert.SerializeObject(commandeLivre));
-                }
-                else
-                {
-                    access.SupprimerEnregistrement("commandedocument", JsonConvert.SerializeObject(commandeLivre));
-                }
-            }
-
-            return false;
+            access.SupprimerEnregistrement("commandedocument", JsonConvert.SerializeObject(commande));
         }
 
         /// <summary>
