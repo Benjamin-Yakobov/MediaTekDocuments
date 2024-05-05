@@ -341,6 +341,20 @@ namespace MediaTekDocuments.dal
             return maxid[0].Id;
         }
 
+        /* En cours - ... - ... -> */
+
+        /// <summary>
+        /// Récupération de tous les abonnements aux revues.
+        /// </summary>
+        /// <param name="idRevue"></param>
+        /// <returns></returns>
+        public List<Abonnement> GetAbonnements(string idRevue)
+        {
+            String jsonAbonnementIdRevue = convertToJson("idRevue", idRevue);
+            List<Abonnement> abonnements = TraitementRecup<Abonnement>(GET, "abonnements/" + jsonAbonnementIdRevue);
+            return abonnements;
+        }
+
     }
 
 }

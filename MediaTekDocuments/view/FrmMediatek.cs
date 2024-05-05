@@ -45,6 +45,27 @@ namespace MediaTekDocuments.view
                 cbx.SelectedIndex = -1;
             }
         }
+
+        /// <summary>
+        /// Vérification si la valeur passée en paramètre peut être transtypée en nombre entier.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private bool estNombreEntier(string input)
+        {
+            return int.TryParse(input, out _);
+        }
+
+        /// <summary>
+        /// Vérification si la valeur peut être transtypée en nombre à virgule.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private bool estNombreVirgule(string input)
+        {
+            return float.TryParse(input, out _);
+        }
+
         #endregion
 
         #region Onglet Livres
@@ -1242,25 +1263,33 @@ namespace MediaTekDocuments.view
 
         #region Onglet Commandes de livres 
 
-                                                /*---------- ---------- ---------- Déclarations et Initialisations ---------- ---------- ----------*/
 
-        private readonly BindingSource bdgLivresListe_commandes = new BindingSource();
-        private readonly BindingSource bdgCommandesLivre = new BindingSource();
-        private readonly BindingSource bdgSuivis = new BindingSource();
+
+        /* ---------- ---------- ---------- Déclarations et Initialisations ---------- ---------- ---------- */
+
+
 
         List<Livre> lesLivresCommandes = new List<Livre>();
-        string action;
+        string actionCommandeLivre;
 
-                                                /*---------- ---------- ---------- Méthodes ---------- ---------- ----------*/
+        private readonly BindingSource bdgListeLivres_Commandes = new BindingSource();
+        private readonly BindingSource bdgCommandesLivre_Commandes = new BindingSource();
+        private readonly BindingSource bdgSuivis = new BindingSource();
+
+        
+
+        /* ---------- ---------- ---------- Méthodes ---------- ---------- ---------- */
+
+
 
         /// <summary>
         /// Remplit le DataGridView 'dgvListeLivres' avec la liste de livres fournie en paramètre.
         /// </summary>
         /// <param name="livres"></param>
-        private void RemplirLivresListeCommandes(List<Livre> livres)
+        private void RemplirListeLivres_Commandes(List<Livre> livres)
         {
-            bdgLivresListe_commandes.DataSource = livres;
-            dgvListeLivres.DataSource = bdgLivresListe_commandes;
+            bdgListeLivres_Commandes.DataSource = livres;
+            dgvListeLivres.DataSource = bdgListeLivres_Commandes;
 
 
             dgvListeLivres.Columns["isbn"].Visible = false;
@@ -1281,29 +1310,19 @@ namespace MediaTekDocuments.view
         /// <summary>
         /// Remplit le DataGridView 'dgvListeLivres' avec tous les livres.
         /// </summary>
-        private void RemplirLivresListeCompleteCommandes()
+        private void RemplirListeCompleteLivres_Commandes()
         {
-            RemplirLivresListeCommandes(lesLivresCommandes);
+            RemplirListeLivres_Commandes(lesLivresCommandes);
         }
 
         /// <summary>
-        /// Réinitialisation des ComboBox de filtres par catégories : 'cmbGenresLivres', 'cmbRayonsLivres', et 'cmbPublicsLivres'.
-        /// </summary>
-        private void ViderFiltresCategories()
-        {
-            cmbGenresLivres.SelectedIndex = -1;
-            cmbRayonsLivres.SelectedIndex = -1;
-            cmbPublicsLivres.SelectedIndex = -1;
-        }
-
-        /// <summary>
-        /// Remplit le DataGridView des commandes 'dgvListeCommandes' avec la liste de commandes passée en paramètre.
+        /// Remplit le DataGridView 'dgvListeCommandes' avec la liste de commandes passée en paramètre.
         /// </summary>
         /// <param name="commandesLivre"></param>
-        private void RemplirListeCommandesLivre(List<CommandeDocument> commandesLivre)
+        private void RemplirListeCommandesLivre_Commandes(List<CommandeDocument> commandesLivre)
         {
-            bdgCommandesLivre.DataSource = commandesLivre;
-            dgvListeCommandes.DataSource = bdgCommandesLivre;
+            bdgCommandesLivre_Commandes.DataSource = commandesLivre;
+            dgvListeCommandes.DataSource = bdgCommandesLivre_Commandes;
 
             dgvListeCommandes.Columns["idLivreDvd"].Visible = false;
             dgvListeCommandes.Columns["idSuivi"].Visible = false;
@@ -1318,7 +1337,7 @@ namespace MediaTekDocuments.view
         /// Récupère les commandes d'un livre passé en paramètre et les affiche.
         /// </summary>
         /// <param name="commandesLivre"></param>
-        private void AfficherCommandesLivre(Livre livre)
+        private void AfficherCommandesLivre_Commandes(Livre livre)
         {
             txtNumeroLivre.Text = livre.Id;
 
@@ -1326,18 +1345,17 @@ namespace MediaTekDocuments.view
 
             if (commandesLivre.Count == 0)
             {
-                ViderZoneCommande();
+                ViderZoneDetailsCommandeLivre_Commande();
             }
 
-            RemplirListeCommandesLivre(commandesLivre);
-
+            RemplirListeCommandesLivre_Commandes(commandesLivre);
         }
 
         /// <summary>
         /// Afficher les détails d'une commande passée en paramètre.
         /// </summary>
         /// <param name="commande"></param>
-        private void AfficherDetailsCommande(CommandeDocument commande)
+        private void AfficherDetailsCommandeLivre_Commande(CommandeDocument commande)
         {
             txtNumeroCommande.Text = commande.Id;
             txtNombreExemplaires.Text = commande.NbExemplaire.ToString();
@@ -1347,103 +1365,9 @@ namespace MediaTekDocuments.view
         }
 
         /// <summary>
-        /// Vider la zone des détails d'une commande.
-        /// </summary>
-        public void ViderZoneCommande()
-        {
-            txtNumeroCommande.Text = "";
-            txtNombreExemplaires.Text = "";
-            txtMontantCommande.Text = "";
-            cmbEtatCommande.SelectedIndex = -1;
-        }
-
-        /// <summary>
-        /// Remplit le ComboBox avec les différents états de la commande.
-        /// </summary>
-        /// <param name="suivis"></param>
-        /// <param name="bdgSuivi"></param>
-        /// <param name="cbxSuivi"></param>
-        public void RemplirComboEtatSuivis(List<Suivi> suivis, BindingSource bdgSuivi, ComboBox cmbSuivi)
-        {
-            bdgSuivi.DataSource = suivis;
-            cmbSuivi.DataSource = bdgSuivi;
-            if (cmbSuivi.Items.Count > 0)
-            {
-                cmbSuivi.SelectedIndex = -1;
-            }
-        }
-
-        /// <summary>
-        /// Réinitialisation des champs de recherche de livres.
-        /// </summary>
-        public void ViderZoneRechercheLivres()
-        {
-            txtRechercherNumeroLivre.Text = "";
-            txtRechercherTitreLivre.Text = "";
-        }
-
-        /// <summary>
-        /// Désactiver la zone de détails d'une commande.
-        /// </summary>
-        public void DesactiverZoneDetailsCommande()
-        {
-            txtNombreExemplaires.Enabled = false;
-            txtMontantCommande.Enabled = false;
-            cmbEtatCommande.Enabled = false;
-            dtpDateCommande.Enabled = false;
-        }
-
-        /// <summary>
-        /// Activer la zone de détails d'une commande.
-        /// </summary>
-        public void ActiverZoneDetailsCommande()
-        {
-            txtNombreExemplaires.Enabled = true;
-            txtMontantCommande.Enabled = true;
-            cmbEtatCommande.Enabled = true;
-            dtpDateCommande.Enabled = true;
-        }
-
-        public void DesactiverBoutonsDetailsCommande()
-        {
-            btnAjouterCommande.Enabled = false;
-            btnModifierCommande.Enabled = false;
-            btnSupprimerCommande.Enabled = false;
-            btnValider.Enabled = false;
-        }
-
-        public void ActiverBoutonsDetailsCommande()
-        {
-            btnAjouterCommande.Enabled = true;
-            btnModifierCommande.Enabled = true;
-            btnSupprimerCommande.Enabled = true;
-            btnValider.Enabled = true;
-        }
-
-        /// <summary>
-        /// Verification si la valeur peut etre transtypée en nombre entier.
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        private bool estNombreEntier(string input)
-        {
-            return int.TryParse(input, out _);
-        }
-
-        /// <summary>
-        /// Verification si la valeur peut etre transtypée en nombre à virgule.
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        private bool estNombreVirgule(string input)
-        {
-            return float.TryParse(input, out _);
-        }
-
-        /// <summary>
         /// Valider l'ajout, la modification, et la suppression. //tag*
         /// </summary>
-        public void ValiderAjoutModificationSuppression()
+        public void ValiderActionCommandeLivre()
         {
 
             string id = "";
@@ -1453,9 +1377,9 @@ namespace MediaTekDocuments.view
             string idLivreDvd;
             int idSuivi = -1;
             string etat = "";
-            
 
-            if (action == "ajouter")
+
+            if (actionCommandeLivre == "ajouter")
             {
                 string maxId = controller.GetMaxIdCommande();
                 if (maxId == null)
@@ -1470,14 +1394,14 @@ namespace MediaTekDocuments.view
                     id = maxIdInt.ToString();
                 }
 
-                if(txtNombreExemplaires.Text == "" || txtMontantCommande.Text == "" || cmbEtatCommande.SelectedIndex < 0)
+                if (txtNombreExemplaires.Text == "" || txtMontantCommande.Text == "" || cmbEtatCommande.SelectedIndex < 0)
                 {
                     MessageBox.Show("Veuillez remplir tous les champs.", "Erreur d'ajout");
 
-                    Livre livre = (Livre)bdgLivresListe_commandes.List[bdgLivresListe_commandes.Position];
-                    AfficherCommandesLivre(livre);
+                    Livre livre = (Livre)bdgListeLivres_Commandes.List[bdgListeLivres_Commandes.Position];
+                    AfficherCommandesLivre_Commandes(livre);
 
-                    ViderZoneCommande();
+                    ViderZoneDetailsCommandeLivre_Commande();
                     dgvListeCommandes.ClearSelection();
                 }
                 else
@@ -1486,23 +1410,23 @@ namespace MediaTekDocuments.view
                     {
                         MessageBox.Show("Veuillez respecter le typage des données saisies.", "Erreur d'ajout");
 
-                        Livre livre = (Livre)bdgLivresListe_commandes.List[bdgLivresListe_commandes.Position];
-                        AfficherCommandesLivre(livre);
+                        Livre livre = (Livre)bdgListeLivres_Commandes.List[bdgListeLivres_Commandes.Position];
+                        AfficherCommandesLivre_Commandes(livre);
 
-                        ViderZoneCommande();
+                        ViderZoneDetailsCommandeLivre_Commande();
                         dgvListeCommandes.ClearSelection();
 
                     }
                     else
                     {
-                        if(cmbEtatCommande.SelectedIndex == 1)
+                        if (cmbEtatCommande.SelectedIndex == 2 || cmbEtatCommande.SelectedIndex == 3 || cmbEtatCommande.SelectedIndex == 4)
                         {
-                            MessageBox.Show("Une nouvelle commande ne peut pas être marquée comme 'livrée' avant d'avoir le statut 'en cours'.", "Erreur d'ajout");
+                            MessageBox.Show("Une nouvelle commande ne peut pas être marquée comme 'Relancée' 'Livrée' ou 'Réglée'.", "Erreur d'ajout");
 
-                            Livre livre = (Livre)bdgLivresListe_commandes.List[bdgLivresListe_commandes.Position];
-                            AfficherCommandesLivre(livre);
+                            Livre livre = (Livre)bdgListeLivres_Commandes.List[bdgListeLivres_Commandes.Position];
+                            AfficherCommandesLivre_Commandes(livre);
 
-                            ViderZoneCommande();
+                            ViderZoneDetailsCommandeLivre_Commande();
                             dgvListeCommandes.ClearSelection();
                         }
                         else
@@ -1519,19 +1443,19 @@ namespace MediaTekDocuments.view
                             controller.AjouterCommande(commande);
                             grpActionsCommande.Text = "Ajout réussie";
 
-                            Livre livre = (Livre)bdgLivresListe_commandes.List[bdgLivresListe_commandes.Position];
-                            AfficherCommandesLivre(livre);
+                            Livre livre = (Livre)bdgListeLivres_Commandes.List[bdgListeLivres_Commandes.Position];
+                            AfficherCommandesLivre_Commandes(livre);
 
-                            ViderZoneCommande();
+                            ViderZoneDetailsCommandeLivre_Commande();
                             dgvListeCommandes.ClearSelection();
                         }
 
                     }
-                }  
+                }
             }
             else
             {
-                if (action == "modifier")
+                if (actionCommandeLivre == "modifier")
                 {
                     if (dgvListeCommandes.SelectedRows.Count > 0)
                     {
@@ -1540,10 +1464,10 @@ namespace MediaTekDocuments.view
                         {
                             MessageBox.Show("Veuillez remplir tous les champs.", "Erreur d'ajout");
 
-                            CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre[bdgCommandesLivre.Position];
-                            AfficherDetailsCommande(commandeDocument);
+                            CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre_Commandes[bdgCommandesLivre_Commandes.Position];
+                            AfficherDetailsCommandeLivre_Commande(commandeDocument);
 
-                            ViderZoneCommande();
+                            ViderZoneDetailsCommandeLivre_Commande();
                             dgvListeCommandes.ClearSelection();
                         }
                         else
@@ -1552,10 +1476,10 @@ namespace MediaTekDocuments.view
                             {
                                 MessageBox.Show("Veuillez respecter le typage des données saisies.", "Erreur d'ajout");
 
-                                CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre[bdgCommandesLivre.Position];
-                                AfficherDetailsCommande(commandeDocument);
+                                CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre_Commandes[bdgCommandesLivre_Commandes.Position];
+                                AfficherDetailsCommandeLivre_Commande(commandeDocument);
 
-                                ViderZoneCommande();
+                                ViderZoneDetailsCommandeLivre_Commande();
                                 dgvListeCommandes.ClearSelection();
                             }
                             else
@@ -1573,10 +1497,10 @@ namespace MediaTekDocuments.view
                                 controller.ModifierCommande(commande);
                                 grpActionsCommande.Text = "Modification réussie";
 
-                                Livre livre = (Livre)bdgLivresListe_commandes.List[bdgLivresListe_commandes.Position];
-                                AfficherCommandesLivre(livre);
+                                Livre livre = (Livre)bdgListeLivres_Commandes.List[bdgListeLivres_Commandes.Position];
+                                AfficherCommandesLivre_Commandes(livre);
 
-                                ViderZoneCommande();
+                                ViderZoneDetailsCommandeLivre_Commande();
                                 dgvListeCommandes.ClearSelection();
 
                             }
@@ -1589,7 +1513,7 @@ namespace MediaTekDocuments.view
                 }
                 else
                 {
-                    if (action == "supprimer")
+                    if (actionCommandeLivre == "supprimer")
                     {
                         if (dgvListeCommandes.SelectedRows.Count > 0)
                         {
@@ -1602,14 +1526,14 @@ namespace MediaTekDocuments.view
                             idSuivi = suivi.Id;
                             etat = suivi.Etat;
 
-                            if(idSuivi == 2)
+                            if (idSuivi == 2)
                             {
                                 MessageBox.Show("Impossible de supprimer une commande déjà livrée. ", "Erreur de suppression");
 
-                                Livre livre = (Livre)bdgLivresListe_commandes.List[bdgLivresListe_commandes.Position];
-                                AfficherCommandesLivre(livre);
+                                Livre livre = (Livre)bdgListeLivres_Commandes.List[bdgListeLivres_Commandes.Position];
+                                AfficherCommandesLivre_Commandes(livre);
 
-                                ViderZoneCommande();
+                                ViderZoneDetailsCommandeLivre_Commande();
                                 dgvListeCommandes.ClearSelection();
                             }
                             else
@@ -1619,10 +1543,10 @@ namespace MediaTekDocuments.view
                                 controller.SupprimerCommande(commande);
                                 grpActionsCommande.Text = "Suppression réussie";
 
-                                Livre livre = (Livre)bdgLivresListe_commandes.List[bdgLivresListe_commandes.Position];
-                                AfficherCommandesLivre(livre);
+                                Livre livre = (Livre)bdgListeLivres_Commandes.List[bdgListeLivres_Commandes.Position];
+                                AfficherCommandesLivre_Commandes(livre);
 
-                                ViderZoneCommande();
+                                ViderZoneDetailsCommandeLivre_Commande();
                                 dgvListeCommandes.ClearSelection();
                             }
 
@@ -1637,11 +1561,105 @@ namespace MediaTekDocuments.view
             }
         }
 
+        /// <summary>
+        /// Vider la zone des détails d'une commande.
+        /// </summary>
+        public void ViderZoneDetailsCommandeLivre_Commande()
+        {
+            txtNumeroCommande.Text = "";
+            txtNombreExemplaires.Text = "";
+            txtMontantCommande.Text = "";
+            cmbEtatCommande.SelectedIndex = -1;
+        }
+
+        /// <summary>
+        /// Désactiver la zone de détails d'une commande.
+        /// </summary>
+        public void DesactiverZoneDetailsCommandeLivre_Commande()
+        {
+            txtNombreExemplaires.Enabled = false;
+            txtMontantCommande.Enabled = false;
+            cmbEtatCommande.Enabled = false;
+            dtpDateCommande.Enabled = false;
+        }
+
+        /// <summary>
+        /// Activer la zone de détails d'une commande.
+        /// </summary>
+        public void ActiverZoneDetailsCommandeLivre_Commande()
+        {
+            txtNombreExemplaires.Enabled = true;
+            txtMontantCommande.Enabled = true;
+            cmbEtatCommande.Enabled = true;
+            dtpDateCommande.Enabled = true;
+        }
+
+        /// <summary>
+        /// Desactiver les boutons d'actions sur les commandes de livre.
+        /// </summary>
+        public void DesactiverBoutonsActionCommandeLivre_Commande()
+        {
+            btnAjouterCommande.Enabled = false;
+            btnModifierCommande.Enabled = false;
+            btnSupprimerCommande.Enabled = false;
+            btnValider.Enabled = false;
+        }
+
+        /// <summary>
+        /// Activer les boutons d'actions sur les commandes de livre.
+        /// </summary>
+        public void ActiverBoutonsActionCommandeLivre_Commande()
+        {
+            btnAjouterCommande.Enabled = true;
+            btnModifierCommande.Enabled = true;
+            btnSupprimerCommande.Enabled = true;
+            btnValider.Enabled = true;
+        }
+
+        /// <summary>
+        /// Réinitialisation des champs de recherche de livres.
+        /// </summary>
+        public void ViderZoneRechercheLivres_Commande()
+        {
+            txtRechercherNumeroLivre.Text = "";
+            txtRechercherTitreLivre.Text = "";
+        }
+
+        /// <summary>
+        /// Réinitialisation des ComboBox de filtres par catégories : 'cmbGenresLivres', 'cmbRayonsLivres', et 'cmbPublicsLivres'.
+        /// </summary>
+        private void ReinitialiserComboBoxFiltresLivresCategories()
+        {
+            cmbGenresLivres.SelectedIndex = -1;
+            cmbRayonsLivres.SelectedIndex = -1;
+            cmbPublicsLivres.SelectedIndex = -1;
+        }
+
+        /// <summary>
+        /// Remplit le ComboBox avec les différents états de la commande.
+        /// </summary>
+        /// <param name="suivis"></param>
+        /// <param name="bdgSuivi"></param>
+        /// <param name="cbxSuivi"></param>
+        public void RemplirComboEtatSuivisCommandeLivre_Commande(List<Suivi> suivis, BindingSource bdgSuivi, ComboBox cmbSuivi)
+        {
+            bdgSuivi.DataSource = suivis;
+            cmbSuivi.DataSource = bdgSuivi;
+            if (cmbSuivi.Items.Count > 0)
+            {
+                cmbSuivi.SelectedIndex = -1;
+            }
+        }
+
+
+
         /*---------- ---------- ---------- Évènements  ---------- ---------- ----------*/
+
+
 
         /// <summary>
         /// Événement : Ouverture de l'onglet 'Commandes de livres'.
-        /// Actions : Récupère tous les livres, Remplit le DataGridView 'dgvListeLivres' avec tous les livres, Remplit les ComboBox de tris par catégories (cmbGenresLivres, cmbPublicsLivres, cmbRayonsLivres), Remplit le ComboBox de l'état des commandes (cmbEtatCommande), Réinitialiser les champs de recherches de livres.
+        /// Actions : Initialisation de l'onglet.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -1649,17 +1667,16 @@ namespace MediaTekDocuments.view
         {
             lesLivresCommandes = controller.GetAllLivres();
 
-            RemplirLivresListeCompleteCommandes();
+            RemplirListeCompleteLivres_Commandes();
 
             RemplirComboCategorie(controller.GetAllGenres(), bdgGenres, cmbGenresLivres);
             RemplirComboCategorie(controller.GetAllPublics(), bdgPublics, cmbPublicsLivres);
             RemplirComboCategorie(controller.GetAllRayons(), bdgRayons, cmbRayonsLivres);
 
-            RemplirComboEtatSuivis(controller.GetAllSuivis(), bdgSuivis, cmbEtatCommande);
+            RemplirComboEtatSuivisCommandeLivre_Commande(controller.GetAllSuivis(), bdgSuivis, cmbEtatCommande);
 
-            ViderZoneRechercheLivres();
-            DesactiverZoneDetailsCommande();
-            DesactiverBoutonsDetailsCommande();
+            ViderZoneRechercheLivres_Commande();
+            DesactiverZoneDetailsCommandeLivre_Commande();
         }
 
         /// <summary>
@@ -1678,7 +1695,7 @@ namespace MediaTekDocuments.view
                 Genre genre = (Genre)cmbGenresLivres.SelectedItem;
                 List<Livre> livres = lesLivresCommandes.FindAll(x => x.Genre.Equals(genre.Libelle));
 
-                RemplirLivresListeCommandes(livres);
+                RemplirListeLivres_Commandes(livres);
             }
 
         }
@@ -1700,9 +1717,9 @@ namespace MediaTekDocuments.view
                 Public publics = (Public)cmbPublicsLivres.SelectedItem;
                 List<Livre> livres = lesLivresCommandes.FindAll(x => x.Public.Equals(publics.Libelle));
 
-                RemplirLivresListeCommandes(livres);
+                RemplirListeLivres_Commandes(livres);
 
-                ViderZoneRechercheLivres();
+                ViderZoneRechercheLivres_Commande();
             }
 
         }
@@ -1724,9 +1741,9 @@ namespace MediaTekDocuments.view
                 Rayon rayon = (Rayon)cmbRayonsLivres.SelectedItem;
                 List<Livre> livres = lesLivresCommandes.FindAll(x => x.Rayon.Equals(rayon.Libelle));
 
-                RemplirLivresListeCommandes(livres);
+                RemplirListeLivres_Commandes(livres);
 
-                ViderZoneRechercheLivres();
+                ViderZoneRechercheLivres_Commande();
             }
             
         }
@@ -1739,8 +1756,8 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void btnAnnulerGenres_Click(object sender, EventArgs e)
         {
-            RemplirLivresListeCompleteCommandes();
-            ViderFiltresCategories();
+            RemplirListeCompleteLivres_Commandes();
+            ReinitialiserComboBoxFiltresLivresCategories();
         }
 
         /// <summary>
@@ -1751,8 +1768,8 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void btnAnnulerPublics_Click(object sender, EventArgs e)
         {
-            RemplirLivresListeCompleteCommandes();
-            ViderFiltresCategories();
+            RemplirListeCompleteLivres_Commandes();
+            ReinitialiserComboBoxFiltresLivresCategories();
         }
 
         /// <summary>
@@ -1763,8 +1780,8 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void btnAnnulerRayons_Click(object sender, EventArgs e)
         {
-            RemplirLivresListeCompleteCommandes();
-            ViderFiltresCategories();
+            RemplirListeCompleteLivres_Commandes();
+            ReinitialiserComboBoxFiltresLivresCategories();
         }
 
         /// <summary>
@@ -1783,27 +1800,27 @@ namespace MediaTekDocuments.view
                 Livre livre = lesLivresCommandes.Find(x => x.Id.Equals(txtRechercherNumeroLivre.Text));
                 List<Livre> livres = new List<Livre>();
 
-                ViderFiltresCategories();
+                ReinitialiserComboBoxFiltresLivresCategories();
 
                 if (livre != null)
                 {
                     txtRechercherTitreLivre.Text = "";
-                    RemplirLivresListeCompleteCommandes(); 
+                    RemplirListeCompleteLivres_Commandes(); 
                     livres.Add(livre);
-                    RemplirLivresListeCommandes(livres);   
+                    RemplirListeLivres_Commandes(livres);   
                 }
                 else
                 {
                     MessageBox.Show("Numéro de livre introuvable");
-                    RemplirLivresListeCompleteCommandes();
-                    ViderZoneRechercheLivres();
+                    RemplirListeCompleteLivres_Commandes();
+                    ViderZoneRechercheLivres_Commande();
                 }
             }
             else
             {
                 txtRechercherTitreLivre.Text = "";
-                ViderFiltresCategories();
-                RemplirLivresListeCompleteCommandes();
+                ReinitialiserComboBoxFiltresLivresCategories();
+                RemplirListeCompleteLivres_Commandes();
             }
         }
 
@@ -1816,11 +1833,11 @@ namespace MediaTekDocuments.view
         private void txtRechercherTitreLivre_TextChanged(object sender, EventArgs e)
         {
             txtRechercherNumeroLivre.Text = "";
-            ViderFiltresCategories();
+            ReinitialiserComboBoxFiltresLivresCategories();
 
             List<Livre> livres = new List<Livre>();
             livres = lesLivresCommandes.FindAll(x => x.Titre.ToLower().Contains(txtRechercherTitreLivre.Text.ToLower()));
-            RemplirLivresListeCommandes(livres);
+            RemplirListeLivres_Commandes(livres);
         }
 
         /// <summary>
@@ -1830,17 +1847,11 @@ namespace MediaTekDocuments.view
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void dgvListeLivres_SelectionChanged(object sender, EventArgs e)
-        {
-            if(dgvListeLivres.SelectedRows.Count > 0)
+        {     
+            if (dgvListeLivres.SelectedRows.Count > 0)
             {
-                DesactiverZoneDetailsCommande();
-                DesactiverBoutonsDetailsCommande();
-
-                btnAjouterCommande.Enabled = true;
-                btnValider.Enabled = true;
-
-                Livre livre = (Livre)bdgLivresListe_commandes.List[bdgLivresListe_commandes.Position];
-                AfficherCommandesLivre(livre);
+                Livre livre = (Livre)bdgListeLivres_Commandes.List[bdgListeLivres_Commandes.Position];
+                AfficherCommandesLivre_Commandes(livre);
             }
 
             grpActionsCommande.Text = "Actions";
@@ -1854,13 +1865,11 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void dgvListeCommandes_SelectionChanged(object sender, EventArgs e)
         {
-            if(dgvListeCommandes.SelectedRows.Count > 0)
-            {
-                DesactiverZoneDetailsCommande();
-                ActiverBoutonsDetailsCommande();
 
-                CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre[bdgCommandesLivre.Position];
-                AfficherDetailsCommande(commandeDocument);
+            if (dgvListeCommandes.SelectedRows.Count > 0)
+            {
+                CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre_Commandes[bdgCommandesLivre_Commandes.Position];
+                AfficherDetailsCommandeLivre_Commande(commandeDocument);
             }
         }
 
@@ -1872,11 +1881,14 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void btnAjouterCommande_Click(object sender, EventArgs e)
         {
-            ViderZoneCommande();
-            ActiverZoneDetailsCommande();
 
-            action = "ajouter";
+            ViderZoneDetailsCommandeLivre_Commande();
+            ActiverZoneDetailsCommandeLivre_Commande();
 
+            cmbEtatCommande.SelectedIndex = 0;
+            cmbEtatCommande.Enabled = false;
+
+            actionCommandeLivre = "ajouter";
             grpActionsCommande.Text = "Action : ajouter";
             
         }
@@ -1889,17 +1901,13 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void btnModifierCommande_Click(object sender, EventArgs e)
         {
-            ActiverZoneDetailsCommande();
 
-            CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre[bdgCommandesLivre.Position];
+            CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre_Commandes[bdgCommandesLivre_Commandes.Position];
             string etat = commandeDocument.Etat;
-            if (etat == "Livrée")
-            {
-                cmbEtatCommande.Enabled = false;
-            }
 
-            action = "modifier";
+            ActiverZoneDetailsCommandeLivre_Commande();
 
+            actionCommandeLivre = "modifier";
             grpActionsCommande.Text = "Action : modifier";
         }
 
@@ -1911,8 +1919,11 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void btnSupprimerCommande_Click(object sender, EventArgs e)
         {
-            DesactiverZoneDetailsCommande();
-            action = "supprimer";
+            CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre_Commandes[bdgCommandesLivre_Commandes.Position];
+            string etat = commandeDocument.Etat;
+
+            DesactiverZoneDetailsCommandeLivre_Commande();
+            actionCommandeLivre = "supprimer";
 
             grpActionsCommande.Text = "Action : supprimer";
         }
@@ -1925,7 +1936,7 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void btnValider_Click(object sender, EventArgs e)
         {
-            ValiderAjoutModificationSuppression();
+            ValiderActionCommandeLivre();
         }
 
         /// <summary>
@@ -1964,14 +1975,14 @@ namespace MediaTekDocuments.view
                     break;
             }
 
-            RemplirLivresListeCommandes(listeLivresTri);
+            RemplirListeLivres_Commandes(listeLivresTri);
         }
 
         #endregion
 
         #region Onglet Commandes de DVD
 
-        /*---------- ---------- ---------- Déclarations et Initialisations ---------- ---------- ----------*/
+        /* ---------- ---------- ---------- ---------- Déclarations et Initialisations ---------- ---------- ---------- ---------- */
 
         List<Dvd> lesDvd_Commandes = new List<Dvd>();
         string ActionCommandeDvd = "";
@@ -1979,8 +1990,7 @@ namespace MediaTekDocuments.view
         BindingSource bdgDvd_Commandes = new BindingSource();
         BindingSource bdgDvdCommandes_Commandes = new BindingSource();
 
-        /*------------------------------ Méthodes ------------------------------*/
-
+        /* ---------- ---------- ---------- ---------- Méthodes ---------- ---------- ---------- ---------- */
 
         /// <summary>
         /// Remplir le DataGridView 'dgvListeDvd_Commandes' avec la liste des DVD passée en paramètre.
@@ -2112,6 +2122,9 @@ namespace MediaTekDocuments.view
             if (ActionCommandeDvd == "AjouterCommandeDvd")
             {
                 string maxId = controller.GetMaxIdCommande();
+
+                MessageBox.Show(maxId);
+
                 if (maxId == null)
                 {
                     id = "1";
@@ -2317,7 +2330,7 @@ namespace MediaTekDocuments.view
             txtRechercherTitreDvd.Text = "";
         }
 
-        /*------------------------------ Evenements ------------------------------*/
+        /* ---------- ---------- ---------- ---------- Évènement ---------- ---------- ---------- ---------- */
 
         /// <summary>
         /// Événement : Ouverture de l'onglet 'Commandes de DVD'.
@@ -2334,7 +2347,7 @@ namespace MediaTekDocuments.view
             RemplirComboCategorie(controller.GetAllPublics(), bdgPublics, cmbPublicDvd);
             RemplirComboCategorie(controller.GetAllRayons(), bdgRayons, cmbRayonDvd);
 
-            RemplirComboEtatSuivis(controller.GetAllSuivis(), bdgSuivis, cmbEtatCommandeDvd);
+            RemplirComboEtatSuivisCommandeLivre_Commande(controller.GetAllSuivis(), bdgSuivis, cmbEtatCommandeDvd);
 
             DesactiverZoneDetailsCommandeDvd();
             DesactiverBoutonsActionsCommandeDvd();
@@ -2655,6 +2668,535 @@ namespace MediaTekDocuments.view
         }
 
         #endregion
+
+        #region Onglet Abonnements aux revues
+
+        /*---------- ---------- ---------- ---------- Déclarations et Initialisations ---------- ---------- ---------- ---------- ----------*/
+
+        List<Revue> lesRevues_Abonnements = new List<Revue>();
+        String actionAbonnement;
+
+        BindingSource bdgRevues = new BindingSource();
+        BindingSource bdgAbonnements_revue = new BindingSource();
+
+        /*---------- ---------- ---------- ---------- Méthodes ---------- ---------- ---------- ---------- ----------*/
+
+        /// <summary>
+        /// Remplir le DataGridView 'dgvListeRevues_Abonnements' avec la liste des revues passée en paramètre.
+        /// </summary>
+        /// <param name="revues"></param>
+        public void RemplirListeRevues_Abonnements(List<Revue> revues)
+        {
+            bdgRevues.DataSource = revues;
+            dgvListeRevues_Abonnements.DataSource = bdgRevues;
+
+            dgvListeRevues_Abonnements.Columns["idGenre"].Visible = false;
+            dgvListeRevues_Abonnements.Columns["idPublic"].Visible = false;
+            dgvListeRevues_Abonnements.Columns["idRayon"].Visible = false;
+            dgvListeRevues_Abonnements.Columns["Image"].Visible = false;
+
+            dgvListeRevues_Abonnements.Columns["Id"].DisplayIndex = 0;
+            dgvListeRevues_Abonnements.Columns["Titre"].DisplayIndex = 1;
+
+            dgvListeRevues_Abonnements.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            dgvListeRevues_Abonnements.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+        }
+
+        /// <summary>
+        /// Remplir le DataGridView 'dgvListeRevues_Abonnements' avec toutes les revues.
+        /// </summary>
+        public void RemplirListeCompleteRevues_Abonnements()
+        {
+            RemplirListeRevues_Abonnements(controller.GetAllRevues());
+        }
+
+        /// <summary>
+        /// Réinitialisation des ComboBox de filtre des revues (cmbFiltrerRevuesGenre, cmbFiltrerRevuesPublic, cmbFiltrerRevuesRayon).
+        /// </summary>
+        public void ReinitialiserComboCategories_Abonnements()
+        {
+            cmbFiltrerRevuesGenre.SelectedIndex = -1;
+            cmbFiltrerRevuesPublic.SelectedIndex = -1;
+            cmbFiltrerRevuesRayon.SelectedIndex = -1;
+        }
+
+        /// <summary>
+        /// Remplir le DataGridView 'dgvAbonnementsRevue' avec la liste des abonnements d'une revue passée en paramètre.
+        /// </summary>
+        /// <param name="abonnements"></param>
+        public void RemplirAbonnements_Abonnements(List<Abonnement> abonnements)
+        {
+            bdgAbonnements_revue.DataSource = abonnements;
+            dgvAbonnementsRevue.DataSource = bdgAbonnements_revue;
+
+            dgvAbonnementsRevue.Columns["IdRevue"].Visible = false;
+
+            dgvAbonnementsRevue.Columns["Id"].DisplayIndex = 0;
+            dgvAbonnementsRevue.Columns["Montant"].DisplayIndex = 1;
+            dgvAbonnementsRevue.Columns["DateCommande"].DisplayIndex = 2;
+
+            dgvAbonnementsRevue.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+
+        }
+
+        /// <summary>
+        /// Affichage des abonnements d'une revue correspondant à l'identifiant de la revue passé en paramètre.
+        /// </summary>
+        /// <param name="idRevue"></param>
+        public void AfficherAbonnements_Abonnements(string idRevue)
+        {
+            List<Abonnement> abonnements = new List<Abonnement>();
+            abonnements = controller.GetAbonnements(idRevue);
+            RemplirAbonnements_Abonnements(abonnements);
+        }
+
+        /// <summary>
+        /// Affichage des détails d'un abonnement dans la zone de détails d'un abonnement.
+        /// </summary>
+        /// <param name="abonnement"></param>
+        public void AfficherDetailsAbonnement(Abonnement abonnement)
+        {
+            txtNumeroAbonnementRevue.Text = abonnement.Id;
+            txtNumeroRevue.Text = abonnement.IdRevue;
+            txtMontantAbonnementRevue.Text = abonnement.Montant.ToString();
+            dtpDateAbonnementRevue.Value = abonnement.DateCommande;
+            dtpDateAbonnementFin.Value = abonnement.DateFinAbonnement;
+        }
+
+        /// <summary>
+        /// Vider la zone de détails d'un abonnement.
+        /// </summary>
+        public void ViderZoneDetailsAbonnement()
+        {
+            txtNumeroAbonnementRevue.Text = "";
+            txtMontantAbonnementRevue.Text = "";
+            dtpDateAbonnementRevue.Value = DateTime.Now;
+            dtpDateAbonnementFin.Value = DateTime.Now;
+        }
+
+        /// <summary>
+        /// Désactiver les boutons d'action sur un abonnement.
+        /// </summary>
+        public void DesactiverBoutonsActionAbonnement()
+        {
+            btnAjouterAbonnement.Enabled = false;
+            btnModifierAbonnement.Enabled = false;
+            btnSupprimerAbonnement.Enabled = false;
+            btnValiderActionAbonnement.Enabled = false;
+        }
+
+        /// <summary>
+        /// Désactiver la zone de détails d'un abonnement.
+        /// </summary>
+        public void DesactiverZoneDetailsAbonnement()
+        {
+            txtNumeroAbonnementRevue.Enabled = false;
+            txtNumeroRevue.Enabled = false;
+            txtNumeroAbonnementRevue.Enabled = false;
+            txtMontantAbonnementRevue.Enabled = false;
+            dtpDateAbonnementRevue.Enabled = false;
+            dtpDateAbonnementFin.Enabled = false;
+        }
+
+        /// <summary>
+        /// Activer la zone de détails d'un abonnement.
+        /// </summary>
+        public void ActiverZoneDetailsAbonnement()
+        {
+            txtMontantAbonnementRevue.Enabled = true;
+            dtpDateAbonnementRevue.Enabled = true;
+            dtpDateAbonnementFin.Enabled = true;
+        }
+
+        /// <summary>
+        /// Valider l'action en cours (Ajouter, Modifier, Supprimer)
+        /// </summary>
+        public void ValiderActionAbonnement()
+        {
+            string id = "";
+            DateTime dateCommande;
+            double montant = -1;
+            DateTime dateFinAbonnement;
+            string idRevue = "";
+
+            if (actionAbonnement == "ActionAjouterAbonnement")
+            {
+                string maxId = controller.GetMaxIdCommande();
+
+                if (maxId == null)
+                {
+                    id = "1";
+                    txtNumeroAbonnementRevue.Text = id;
+                }
+                else
+                {
+                    int maxIdInt = int.Parse(maxId);
+                    maxIdInt++;
+                    id = maxIdInt.ToString();
+                }
+
+                if(txtMontantAbonnementRevue.Text == "")
+                {
+                    MessageBox.Show("Veuillez remplir tous les champs.", "Erreur d'ajout");
+                    ViderZoneDetailsAbonnement();
+                }
+                else
+                {
+                    if (!estNombreVirgule(txtMontantAbonnementRevue.Text))
+                    {
+                        MessageBox.Show("Veuillez respecter le typage des données saisies.", "Erreur d'ajout");
+                        ViderZoneDetailsAbonnement();
+                    }
+                    else
+                    {
+                        id = txtNumeroAbonnementRevue.Text;
+                        dateCommande = dtpDateAbonnementRevue.Value;
+                        montant = float.Parse(txtMontantAbonnementRevue.Text);
+                        dateFinAbonnement = dtpDateAbonnementFin.Value;
+                        idRevue = txtNumeroRevue.Text;
+
+                        Abonnement abonnement = new Abonnement(id, dateCommande, montant, dateFinAbonnement, idRevue);
+                        controller.AjouterAbonnement(abonnement);
+                    }
+                }
+                
+                AfficherAbonnements_Abonnements(idRevue);
+
+            }
+            else
+            {
+                if (actionAbonnement == "ActionModifierAbonnement")
+                {
+                    if (txtMontantAbonnementRevue.Text == "")
+                    {
+                        MessageBox.Show("Veuillez remplir tous les champs.", "Erreur d'ajout");
+                        ViderZoneDetailsAbonnement();
+                    }
+                    else
+                    {
+                        if (!estNombreVirgule(txtMontantAbonnementRevue.Text))
+                        {
+                            MessageBox.Show("Veuillez respecter le typage des données saisies.", "Erreur d'ajout");
+                            ViderZoneDetailsAbonnement();
+                        }
+                        else
+                        {
+
+                            id = txtNumeroAbonnementRevue.Text;
+                            dateCommande = dtpDateAbonnementRevue.Value;
+                            montant = float.Parse(txtMontantAbonnementRevue.Text);
+                            dateFinAbonnement = dtpDateAbonnementFin.Value;
+                            idRevue = txtNumeroRevue.Text;
+
+
+                            Abonnement abonnement = new Abonnement(id, dateCommande, montant, dateFinAbonnement, idRevue);
+                            controller.ModifierAbonnement(abonnement);
+                        }
+
+                        AfficherAbonnements_Abonnements(idRevue);
+
+                    }
+
+                }
+                else
+                {
+                    if (actionAbonnement == "ActionSupprimerAbonnement")
+                    {
+                        id = txtNumeroAbonnementRevue.Text;
+                        dateCommande = dtpDateAbonnementRevue.Value;
+                        montant = float.Parse(txtMontantAbonnementRevue.Text);
+                        dateFinAbonnement = dtpDateAbonnementFin.Value;
+                        idRevue = txtNumeroRevue.Text;
+
+
+                        Abonnement abonnement = new Abonnement(id, dateCommande, montant, dateFinAbonnement, idRevue);
+                        controller.SupprimerAbonnement(abonnement);
+
+                        AfficherAbonnements_Abonnements(idRevue);
+                    }
+                }
+            }
+        }
+
+        /*---------- ---------- ---------- ---------- Évènement ---------- ---------- ---------- ---------- ----------*/
+
+        /// <summary>
+        /// Évènement : Ouverture de l'onglet 'Abonnements aux revues'.
+        /// Actions : Initialisation de l'onglet.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tabAbonnementsRevues_Enter(object sender, EventArgs e)
+        {
+            lesRevues_Abonnements = controller.GetAllRevues();
+            RemplirListeCompleteRevues_Abonnements();
+
+            RemplirComboCategorie(controller.GetAllGenres(), bdgGenres, cmbFiltrerRevuesGenre);
+            RemplirComboCategorie(controller.GetAllPublics(), bdgPublics, cmbFiltrerRevuesPublic);
+            RemplirComboCategorie(controller.GetAllRayons(), bdgRayons, cmbFiltrerRevuesRayon);
+
+            ReinitialiserComboCategories_Abonnements();
+            DesactiverBoutonsActionAbonnement();
+            DesactiverZoneDetailsAbonnement();
+        }
+
+        /// <summary>
+        /// Évènement : Clique sur le bouton d'annulation du filtre des revues par genre 'btnAnnulerFiltreGenreRevues'.
+        /// Actions : Annulation du filtre par genre des revues.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnAnnulerFiltreGenreRevues_Click(object sender, EventArgs e)
+        {
+            ReinitialiserComboCategories_Abonnements();
+            RemplirListeCompleteRevues_Abonnements();
+        }
+
+        /// <summary>
+        /// Évènement : Clique sur le bouton d'annulation du filtre des revues par public 'btnAnnulerFiltrePublicRevues'.
+        /// Actions : Annulation du filtre par public des revues.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnAnnulerFiltrePublicRevues_Click(object sender, EventArgs e)
+        {
+            ReinitialiserComboCategories_Abonnements();
+            RemplirListeCompleteRevues_Abonnements();
+        }
+
+        /// <summary>
+        /// Évènement : Clique sur le bouton d'annulation du filtre des revues par rayon 'btnAnnulerFiltreRayonRevues'.
+        /// Actions : Annulation du filtre par rayon des revues.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnAnnulerFiltreRayonRevues_Click(object sender, EventArgs e)
+        {
+            ReinitialiserComboCategories_Abonnements();
+            RemplirListeCompleteRevues_Abonnements();
+        }
+
+        /// <summary>
+        /// Évènement : Sélection d'un genre dans le ComboBox 'cmbFiltrerRevuesGenre'.
+        /// Actions : Affichage des revues faisant partie de ce genre.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmbFiltrerRevuesGenre_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Genre genre_categorie = (Genre)cmbFiltrerRevuesGenre.SelectedItem;
+            List<Revue> revues = new List<Revue>();
+
+            if(genre_categorie != null && cmbFiltrerRevuesGenre.SelectedIndex > 0)
+            {
+                revues = lesRevues_Abonnements.FindAll(x => x.Genre.Equals(genre_categorie.Libelle));
+                RemplirListeRevues_Abonnements(revues);
+            }
+           
+        }
+
+        /// <summary>
+        /// Évènement : Sélection d'un public dans le ComboBox 'cmbFiltrerRevuesPublic'.
+        /// Actions : Affichage des revues faisant partie de ce public.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmbFiltrerRevuesPublic_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Public public_categorie = (Public)cmbFiltrerRevuesPublic.SelectedItem;
+            List<Revue> revues = new List<Revue>();
+
+            if (public_categorie != null && cmbFiltrerRevuesPublic.SelectedIndex > 0)
+            {
+                revues = lesRevues_Abonnements.FindAll(x => x.Public.Equals(public_categorie.Libelle));
+                RemplirListeRevues_Abonnements(revues);
+            }
+        }
+
+        /// <summary>
+        /// Évènement : Sélection d'un rayon dans le ComboBox 'cmbFiltrerRevuesRayon'
+        /// Actions : Affichage des revues faisant partie de ce rayon.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void cmbFiltrerRevuesRayon_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Rayon rayon_categorie = (Rayon)cmbFiltrerRevuesRayon.SelectedItem;
+            List<Revue> revues = new List<Revue>();
+
+            if (rayon_categorie != null && cmbFiltrerRevuesRayon.SelectedIndex > 0)
+            {
+                revues = lesRevues_Abonnements.FindAll(x => x.Rayon.Equals(rayon_categorie.Libelle));
+                RemplirListeRevues_Abonnements(revues);
+            }
+        }
+
+        /// <summary>
+        /// Évènement : Clic sur le bouton de recherche d'un numéro de revue 'btnRechercherRevue'.
+        /// Actions : Affichage de la revue correspondant à ce numéro de revue dans le DataGrideView 'dgvListeRevues_Abonnements'.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnRechercherRevue_Click(object sender, EventArgs e)
+        {
+            Revue revue = lesRevues_Abonnements.Find(x => x.Id.Equals(txtRechercherNumeroRevue.Text));
+            List<Revue> revues = new List<Revue>();
+            revues.Add(revue);
+            RemplirListeRevues_Abonnements(revues);
+        }
+
+        /// <summary>
+        /// Évènement : Saisie d'une chaîne de caractères dans la zone de saisie 'txtRechercherTitreRevue'.
+        /// Actions : Affichage des revues contenant dans leur titre la chaîne de caractères saisie dans le DataGrideView 'dgvListeRevues_Abonnements'.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void txtRechercherTitreRevue_TextChanged(object sender, EventArgs e)
+        {
+            List<Revue> lesRevues = new List<Revue>();
+            lesRevues = lesRevues_Abonnements.FindAll(x => x.Titre.ToLower().Contains(txtRechercherTitreRevue.Text.ToLower()));
+            RemplirListeRevues_Abonnements(lesRevues);
+        }
+
+        /// <summary>
+        /// Évènement : Sélection d'une revue dans le DataGridView 'dgvListeRevues_Abonnements'.
+        /// Actions : Affichage des abonnements dans le DataGridView 'dgvAbonnementsRevue'.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgvListeRevues_Abonnements_SelectionChanged(object sender, EventArgs e)
+        {
+            Revue revue = (Revue)bdgRevues.List[bdgRevues.Position];
+            AfficherAbonnements_Abonnements(revue.Id);
+
+            txtNumeroRevue.Text = revue.Id;
+            ViderZoneDetailsAbonnement();
+            DesactiverZoneDetailsAbonnement();
+
+            btnAjouterAbonnement.Enabled = true;
+            btnModifierAbonnement.Enabled = false;
+            btnSupprimerAbonnement.Enabled = false;
+            btnValiderActionAbonnement.Enabled = true;
+        }
+
+        /// <summary>
+        /// Événement : Sélection d'un abonnement dans le DataGridView 'dgvAbonnementsRevue'.
+        /// Actions : Affichage des détails d'un abonnement dans la zone de détails d'un abonnement.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgvAbonnementsRevue_SelectionChanged(object sender, EventArgs e)
+        {
+            if(dgvAbonnementsRevue.SelectedRows.Count > 0)
+            {
+                Abonnement abonnement = (Abonnement)bdgAbonnements_revue.List[bdgAbonnements_revue.Position];
+                AfficherDetailsAbonnement(abonnement);
+
+                btnAjouterAbonnement.Enabled = false;
+                btnModifierAbonnement.Enabled = true;
+                btnSupprimerAbonnement.Enabled = true;
+                btnValiderActionAbonnement.Enabled = true;
+
+                DesactiverZoneDetailsAbonnement();
+
+            }
+
+        }
+
+        /// <summary>
+        /// Événement : Clique sur le bouton d'ajout d'un abonnement 'btnAjouterAbonnement'.
+        /// Actions : Ajouter un abonnement.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnAjouterAbonnement_Click(object sender, EventArgs e)
+        {
+            ActiverZoneDetailsAbonnement();
+
+            actionAbonnement = "ActionAjouterAbonnement";
+        }
+
+        /// <summary>
+        /// Événement : Clique sur le bouton de modification d'un abonnement 'btnModifierAbonnement'.
+        /// Actions : Modifier un abonnement.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnModifierAbonnement_Click(object sender, EventArgs e)
+        {
+            ActiverZoneDetailsAbonnement();
+
+            actionAbonnement = "ActionModifierAbonnement";
+        }
+
+        /// <summary>
+        /// Événement : Clique sur le bouton de suppression d'un abonnement 'btnSupprimerAbonnement'.
+        /// Actions : Supprimer un abonnement.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnSupprimerAbonnement_Click(object sender, EventArgs e)
+        {
+            DesactiverZoneDetailsAbonnement();
+
+            actionAbonnement = "ActionSupprimerAbonnement";
+        }
+
+        /// <summary>
+        /// Événement : Clique sur le bouton de validation de l'action en cours sur un abonnment 'btnValiderActionAbonnement'.
+        /// Actions : Valider l'action en cours sur un abonnement.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnValiderActionAbonnement_Click(object sender, EventArgs e)
+        {
+            ValiderActionAbonnement();
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dgvListeRevues_Abonnements_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            string titre = dgvListeRevues_Abonnements.Columns[e.ColumnIndex].HeaderText;
+            List<Revue> listeRevueTri = new List<Revue>();
+
+            switch (titre)
+            {
+                case "Id":
+                    listeRevueTri = lesRevues_Abonnements.OrderBy(o => o.Id).ToList();
+                    break;
+                case "Titre":
+                    listeRevueTri = lesRevues_Abonnements.OrderBy(o => o.Titre).ToList();
+                    break;
+                case "Periodicite":
+                    listeRevueTri = lesRevues_Abonnements.OrderBy(o => o.Periodicite).ToList();
+                    break;
+                case "DelaiMiseADispo":
+                    listeRevueTri = lesRevues_Abonnements.OrderBy(o => o.DelaiMiseADispo).ToList();
+                    break;
+                case "Genre":
+                    listeRevueTri = lesRevues_Abonnements.OrderBy(o => o.Genre).ToList();
+                    break;
+                case "Public":
+                    listeRevueTri = lesRevues_Abonnements.OrderBy(o => o.Public).ToList();
+                    break;
+                case "Rayon":
+                    listeRevueTri = lesRevues_Abonnements.OrderBy(o => o.Rayon).ToList();
+                    break;
+            }
+
+            RemplirListeRevues_Abonnements(listeRevueTri);
+
+        }
+
+        #endregion
+
+
     }
 
 }

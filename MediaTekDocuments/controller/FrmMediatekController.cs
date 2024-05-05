@@ -154,6 +154,54 @@ namespace MediaTekDocuments.controller
             string maxId = access.getMaxId("maxcommande");
             return maxId;
         }
+
+
+
+
+
+
+
+
+
+        // En cours -...- ...-...-->
+
+        /// <summary>
+        /// Récupérations de tous les abonnements.
+        /// </summary>
+        /// <param name="idRevue"></param>
+        /// <returns></returns>
+        public List<Abonnement> GetAbonnements(string idRevue)
+        {
+            return access.GetAbonnements(idRevue);
+        }
+
+        /// <summary>
+        /// Ajouter un abonnement.
+        /// </summary>
+        /// <param name="abonnement"></param>
+        public void AjouterAbonnement(Abonnement abonnement)
+        {
+            access.AjouterEnregistrement("abonnement", JsonConvert.SerializeObject(abonnement));
+        }
+
+        /// <summary>
+        /// Modifier un abonement.
+        /// </summary>
+        /// <param name="abonnement"></param>
+        public void ModifierAbonnement(Abonnement abonnement)
+        {
+            access.ModifierEnregistrement("abonnement", abonnement.Id, JsonConvert.SerializeObject(abonnement));
+        }
+
+        /// <summary>
+        /// Supprimer un abonnement.
+        /// </summary>
+        /// <param name="abonnement"></param>
+        public void SupprimerAbonnement(Abonnement abonnement)
+        {
+            access.SupprimerEnregistrement("abonnement", JsonConvert.SerializeObject(abonnement));
+        }
+
     }
 
 }
