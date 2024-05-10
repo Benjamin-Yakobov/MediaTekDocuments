@@ -1,14 +1,16 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace MediaTekDocuments.model
 {
     /// <summary>
-    /// Classe métier Categorie (réunit les informations des classes Public, Genre et Rayon)
+    /// Classe metier 'Service'
     /// </summary>
-    public class Categorie
+   class Service
     {
-        /// <summary>
-        /// Propriétés de la classe.
-        /// </summary>
         public string Id { get; }
         public string Libelle { get; }
 
@@ -17,20 +19,19 @@ namespace MediaTekDocuments.model
         /// </summary>
         /// <param name="id"></param>
         /// <param name="libelle"></param>
-        public Categorie(string id, string libelle)
+        public Service(string id, string libelle)
         {
             this.Id = id;
             this.Libelle = libelle;
         }
 
         /// <summary>
-        /// Récupération du libellé pour l'affichage dans les combos
+        ///  Récupération du libellé des services.
         /// </summary>
-        /// <returns>Libelle</returns>
+        /// <returns></returns>
         public override string ToString()
         {
             return this.Libelle;
         }
-
     }
 }

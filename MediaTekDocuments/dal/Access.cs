@@ -17,7 +17,7 @@ namespace MediaTekDocuments.dal
         /// <summary>
         /// adresse de l'API
         /// </summary>
-        private static readonly string uriApi = "http://localhost/rest_mediatekdocuments/";
+        private static readonly string uriApi = "http://w8zcvc.n0c.world/rest_mediatekdocuments/";
         /// <summary>
         /// instance unique de la classe
         /// </summary>
@@ -341,8 +341,6 @@ namespace MediaTekDocuments.dal
             return maxid[0].Id;
         }
 
-        /* En cours - ... - ... -> */
-
         /// <summary>
         /// Récupération de tous les abonnements aux revues.
         /// </summary>
@@ -355,6 +353,30 @@ namespace MediaTekDocuments.dal
             return abonnements;
         }
 
+        /// <summary>
+        /// Récupération du login.
+        /// </summary>
+        /// <param name="mail"></param>
+        /// <param name="hash"></param>
+        /// <returns></returns>
+        public Utilisateur GetLogin(string mail, string password)
+        {
+            Dictionary<string, string> login = new Dictionary<string, string>();
+            login.Add("mail", mail);
+            login.Add("password", password);
+            string Login = JsonConvert.SerializeObject(login);
+            List<Utilisateur> utilisateurs = TraitementRecup<Utilisateur>(GET, "utilisateur/" + Login);
+            
+            if (utilisateurs.Count > 0)
+            {
+                return utilisateurs[0];
+            }
+            else
+            {
+                return null;
+            }
+
+        }
     }
 
 }

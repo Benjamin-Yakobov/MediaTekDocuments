@@ -16,18 +16,26 @@ namespace MediaTekDocuments.view
     public partial class FrmMediatek : Form
     {
         #region Commun
+
         private readonly FrmMediatekController controller;
         private readonly BindingSource bdgGenres = new BindingSource();
         private readonly BindingSource bdgPublics = new BindingSource();
         private readonly BindingSource bdgRayons = new BindingSource();
 
+        private Utilisateur utilisateur;
+
+
+
         /// <summary>
-        /// Constructeur : création du contrôleur lié à ce formulaire
+        /// Constructeur : création du contrôleur.
         /// </summary>
-        internal FrmMediatek()
+        internal FrmMediatek(Utilisateur utilisateur)
         {
             InitializeComponent();
             this.controller = new FrmMediatekController();
+            this.utilisateur = utilisateur;
+            verifDroitAccueil(utilisateur);
+
         }
 
         /// <summary>
@@ -65,6 +73,20 @@ namespace MediaTekDocuments.view
         {
             return float.TryParse(input, out _);
         }
+
+        /// <summary>
+        /// Vérification des droits.
+        /// </summary>
+        /// <param name="lutilisateur"></param>
+        private void verifDroitAccueil(Utilisateur lutilisateur)
+        {
+            if (!controller.verifDroitAccueil(lutilisateur))
+            {
+                MessageBox.Show("Droits insuffisant");
+                Application.Exit();
+            }
+        }
+
 
         #endregion
 

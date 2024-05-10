@@ -155,16 +155,6 @@ namespace MediaTekDocuments.controller
             return maxId;
         }
 
-
-
-
-
-
-
-
-
-        // En cours -...- ...-...-->
-
         /// <summary>
         /// Récupérations de tous les abonnements.
         /// </summary>
@@ -200,6 +190,25 @@ namespace MediaTekDocuments.controller
         public void SupprimerAbonnement(Abonnement abonnement)
         {
             access.SupprimerEnregistrement("abonnement", JsonConvert.SerializeObject(abonnement));
+        }
+
+        /// <summary>
+        ///  Retourne vrai si le service de l'utilisateur est autorisé, non si il est interdit.
+        /// </summary>
+        /// <param name="utilisateur"></param>
+        /// <returns></returns>
+        public bool verifDroitAccueil(Utilisateur utilisateur)
+        {
+            Console.WriteLine(utilisateur.Nom);
+            List<string> services = new List<string> { "Comptabilité", "Bibliothèque", "Accueil" };
+            if (services.Contains(utilisateur.Service))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
     }
