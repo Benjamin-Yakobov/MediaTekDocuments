@@ -17,8 +17,9 @@ namespace MediaTekDocuments.dal
         /// <summary>
         /// adresse de l'API
         /// </summary>
-        //private static readonly string uriApi = "http://w8zcvc.n0c.world/rest_mediatekdocuments/"; // Configuration distante pour acceder a l'API
-        private static readonly string uriApi = "http://localhost/rest_mediatekdocuments/"; // Configuration locale pour acceder a l'API
+        /// 
+        //private static readonly string uriApi = "http://w8zcvc.n0c.world/rest_mediatekdocuments/"; // Configuration distante pour acceder a l'API (ancienne façon)
+        //private static readonly string uriApi = "http://localhost/rest_mediatekdocuments/"; // Configuration locale pour acceder a l'API (ancienne façon)
 
         /// <summary>
         /// instance unique de la classe
@@ -43,17 +44,30 @@ namespace MediaTekDocuments.dal
         /// méthode HTTP pour supprimer
         /// </summary>
         private const string DELETE = "DELETE";
+  
+
+ 
+        /// <summary>
+        /// URL de l'API
+        /// </summary>
+        private static readonly string uriApiName = "MediaTekDocuments.Properties.Settings.mediatekConnectionString";
+
+        /// <summary>
+        /// Information d'authentification (pwd et login)
+        /// </summary>
+        private static readonly string authenticationName = "MediaTekDocuments.Properties.Settings.mediatekAuthenticationString";
+
         /// <summary>
         /// Méthode privée pour créer un singleton
         /// initialise l'accès à l'API
         /// </summary>
-
         private Access()
         {
             String authenticationString;
             try
             {
-                authenticationString = "admin:adminpwd";
+                authenticationString = GetConnectionStringByName(authenticationName); 
+                String uriApi = GetConnectionStringByName(uriApiName); 
                 api = ApiRest.GetInstance(uriApi, authenticationString);
             }
             catch (Exception e)
@@ -62,6 +76,21 @@ namespace MediaTekDocuments.dal
                 Environment.Exit(0);
             }
         }
+
+        /// <summary>
+        /// Récupération de la chaîne de connexion
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        static string GetConnectionStringByName(string name)
+        {
+            string returnValue = null;
+            ConnectionStringSettings settings = ConfigurationManager.ConnectionStrings[name];
+            if (settings != null)
+                returnValue = settings.ConnectionString;
+            return returnValue;
+        }
+
 
         /// <summary>
         /// Création et retour de l'instance unique de la classe
