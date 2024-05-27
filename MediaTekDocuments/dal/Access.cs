@@ -17,7 +17,9 @@ namespace MediaTekDocuments.dal
         /// <summary>
         /// adresse de l'API
         /// </summary>
-        private static readonly string uriApi = "http://w8zcvc.n0c.world/rest_mediatekdocuments/";
+        //private static readonly string uriApi = "http://w8zcvc.n0c.world/rest_mediatekdocuments/"; // Configuration distante pour acceder a l'API
+        private static readonly string uriApi = "http://localhost/rest_mediatekdocuments/"; // Configuration locale pour acceder a l'API
+
         /// <summary>
         /// instance unique de la classe
         /// </summary>
@@ -379,4 +381,5 @@ namespace MediaTekDocuments.dal
         }
     }
 
+    
 }

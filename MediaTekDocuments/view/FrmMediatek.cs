@@ -107,6 +107,34 @@ namespace MediaTekDocuments.view
             RemplirComboCategorie(controller.GetAllPublics(), bdgPublics, cbxLivresPublics);
             RemplirComboCategorie(controller.GetAllRayons(), bdgRayons, cbxLivresRayons);
             RemplirLivresListeComplete();
+
+            AfficherAbonnementFiniMoinTrenteJours();
+
+        }
+
+        bool fait = false;
+        /// <summary>
+        /// Affiche revue dont au moin un abonnement fini dans moin de 30 jours.
+        /// </summary>
+        private void AfficherAbonnementFiniMoinTrenteJours()
+        {
+
+            if(fait == false)
+            {
+                List<Revue> revues = controller.GetAllRevues();
+                string alerteRevues = "Revues dont l'abonnement se termine dans moins de 30 jours : \n";
+
+                foreach (Revue revue in revues)
+                {
+                    List<Abonnement> abonnements = controller.GetAbonnements(revue.Id);
+                    if (abonnements.FindAll(o => (o.DateFinAbonnement <= DateTime.Now.AddMonths(1)) && (o.DateFinAbonnement >= DateTime.Now)).Count > 0)
+                    {
+                        alerteRevues = string.Concat(alerteRevues, "  -" + revue.Titre + "\n");
+                        MessageBox.Show(alerteRevues);
+                    }
+                }
+                fait = true;
+            }
         }
 
         /// <summary>
@@ -1363,6 +1391,9 @@ namespace MediaTekDocuments.view
         {
             txtNumeroLivre.Text = livre.Id;
 
+            ViderZoneDetailsCommandeLivre_Commande();
+            DesactiverZoneDetailsCommandeLivre_Commande();
+
             List<CommandeDocument> commandesLivre = controller.GetCommandesLivre(livre.Id);
 
             if (commandesLivre.Count == 0)
@@ -1546,9 +1577,10 @@ namespace MediaTekDocuments.view
                             idLivreDvd = txtNumeroLivre.Text;
                             Suivi suivi = (Suivi)cmbEtatCommande.SelectedItem;
                             idSuivi = suivi.Id;
+                            MessageBox.Show(idSuivi.ToString());
                             etat = suivi.Etat;
 
-                            if (idSuivi == 2)
+                            if (idSuivi == 4)
                             {
                                 MessageBox.Show("Impossible de supprimer une commande déjà livrée. ", "Erreur de suppression");
 
@@ -1687,6 +1719,7 @@ namespace MediaTekDocuments.view
         /// <param name="e"></param>
         private void tabCommandesLivres_Enter(object sender, EventArgs e)
         {
+
             lesLivresCommandes = controller.GetAllLivres();
 
             RemplirListeCompleteLivres_Commandes();
@@ -1698,7 +1731,10 @@ namespace MediaTekDocuments.view
             RemplirComboEtatSuivisCommandeLivre_Commande(controller.GetAllSuivis(), bdgSuivis, cmbEtatCommande);
 
             ViderZoneRechercheLivres_Commande();
+
             DesactiverZoneDetailsCommandeLivre_Commande();
+            DesactiverBoutonsActionCommandeLivre_Commande();
+   
         }
 
         /// <summary>
@@ -1874,6 +1910,15 @@ namespace MediaTekDocuments.view
             {
                 Livre livre = (Livre)bdgListeLivres_Commandes.List[bdgListeLivres_Commandes.Position];
                 AfficherCommandesLivre_Commandes(livre);
+
+                btnAjouterCommande.Enabled = true; // nouveau
+                btnValider.Enabled = true; // nouveau
+
+                btnModifierCommande.Enabled = false; // nouveau
+                btnSupprimerCommande.Enabled = false; // nouveau
+
+                dgvListeCommandes.ClearSelection(); // nouveau
+
             }
 
             grpActionsCommande.Text = "Actions";
@@ -1892,6 +1937,15 @@ namespace MediaTekDocuments.view
             {
                 CommandeDocument commandeDocument = (CommandeDocument)bdgCommandesLivre_Commandes[bdgCommandesLivre_Commandes.Position];
                 AfficherDetailsCommandeLivre_Commande(commandeDocument);
+
+                btnModifierCommande.Enabled = true; // nouveau 
+                btnSupprimerCommande.Enabled = true; // nouveau
+                btnValider.Enabled = true; // nouveau
+
+                btnAjouterCommande.Enabled = false; // nouveau
+
+                dgvListeLivres.ClearSelection(); // nouveau
+                
             }
         }
 
@@ -2070,6 +2124,11 @@ namespace MediaTekDocuments.view
         /// <param name="idDvd"></param>
         public void AfficherCommandesDvd(string idDvd)
         {
+            ViderZoneDetailsCommandeDvd();
+            DesactiverZoneDetailsCommandeDvd();
+
+            txtNumeroDvd.Text = idDvd;
+
             List<CommandeDocument> commandeDocuments = new List<CommandeDocument>();
             commandeDocuments = controller.GetCommandesLivre(idDvd);
             RemplirCommandesDvdList(commandeDocuments);
@@ -2516,12 +2575,11 @@ namespace MediaTekDocuments.view
 
                 btnAjouterCommandeDvd.Enabled = true;
                 btnValiderActionCommandeDvd.Enabled = true;
+
                 btnModifierCommandeDvd.Enabled = false;
                 btnSupprimerCommandeDvd.Enabled = false;
 
-                DesactiverZoneDetailsCommandeDvd();
-                ViderZoneDetailsCommandeDvd();
-                txtNumeroDvd.Text = dvd.Id;
+                dgvListeCommandesDvd.ClearSelection();
             }
 
         }
@@ -2543,8 +2601,11 @@ namespace MediaTekDocuments.view
 
                 btnAjouterCommandeDvd.Enabled = false;
                 btnModifierCommandeDvd.Enabled = true;
+
                 btnSupprimerCommandeDvd.Enabled = true;
                 btnValiderActionCommandeDvd.Enabled = true;
+
+                dgvListeDvd_Commandes.ClearSelection();
             }
             
         }
@@ -2768,6 +2829,11 @@ namespace MediaTekDocuments.view
         /// <param name="idRevue"></param>
         public void AfficherAbonnements_Abonnements(string idRevue)
         {
+            ViderZoneDetailsAbonnement();
+            DesactiverZoneDetailsAbonnement();
+
+            txtNumeroRevue.Text = idRevue;
+
             List<Abonnement> abonnements = new List<Abonnement>();
             abonnements = controller.GetAbonnements(idRevue);
             RemplirAbonnements_Abonnements(abonnements);
@@ -2856,6 +2922,7 @@ namespace MediaTekDocuments.view
                     int maxIdInt = int.Parse(maxId);
                     maxIdInt++;
                     id = maxIdInt.ToString();
+                    txtNumeroAbonnementRevue.Text = id;
                 }
 
                 if(txtMontantAbonnementRevue.Text == "")
@@ -2933,13 +3000,34 @@ namespace MediaTekDocuments.view
 
 
                         Abonnement abonnement = new Abonnement(id, dateCommande, montant, dateFinAbonnement, idRevue);
-                        controller.SupprimerAbonnement(abonnement);
+
+                        if (ParutionDansAbonnement(abonnement))
+                        {
+                            MessageBox.Show("Une revue a été livrée le temps de cet abonnement, il ne peut etre supprimée");
+                        }
+                        else
+                        {
+                            controller.SupprimerAbonnement(abonnement);
+                        }
+                        
 
                         AfficherAbonnements_Abonnements(idRevue);
                     }
                 }
             }
         }
+
+        /// <summary>
+        /// Vérifie si un abonnement a des exemplaires associés qui ont été achetés dans la période de validité de l'abonnement. 
+        /// </summary>
+        /// <param name="abonnement"></param>
+        /// <returns></returns>
+        private bool ParutionDansAbonnement(Abonnement abonnement)
+        {
+            List<Exemplaire> lesExemplairesAbo = controller.GetExemplairesRevue(abonnement.IdRevue);
+            return lesExemplairesAbo.FindAll(o => (o.DateAchat >= abonnement.DateCommande) && (o.DateAchat <= abonnement.DateFinAbonnement)).Count > 0;
+        }
+
 
         /*---------- ---------- ---------- ---------- Évènement ---------- ---------- ---------- ---------- ----------*/
 
@@ -3092,14 +3180,14 @@ namespace MediaTekDocuments.view
             Revue revue = (Revue)bdgRevues.List[bdgRevues.Position];
             AfficherAbonnements_Abonnements(revue.Id);
 
-            txtNumeroRevue.Text = revue.Id;
-            ViderZoneDetailsAbonnement();
-            DesactiverZoneDetailsAbonnement();
-
             btnAjouterAbonnement.Enabled = true;
+            btnValiderActionAbonnement.Enabled = true;
+
             btnModifierAbonnement.Enabled = false;
             btnSupprimerAbonnement.Enabled = false;
-            btnValiderActionAbonnement.Enabled = true;
+
+            dgvAbonnementsRevue.ClearSelection();
+           
         }
 
         /// <summary>
@@ -3115,12 +3203,13 @@ namespace MediaTekDocuments.view
                 Abonnement abonnement = (Abonnement)bdgAbonnements_revue.List[bdgAbonnements_revue.Position];
                 AfficherDetailsAbonnement(abonnement);
 
-                btnAjouterAbonnement.Enabled = false;
                 btnModifierAbonnement.Enabled = true;
                 btnSupprimerAbonnement.Enabled = true;
+
+                btnAjouterAbonnement.Enabled = false;
                 btnValiderActionAbonnement.Enabled = true;
 
-                DesactiverZoneDetailsAbonnement();
+                dgvListeRevues_Abonnements.ClearSelection();
 
             }
 
